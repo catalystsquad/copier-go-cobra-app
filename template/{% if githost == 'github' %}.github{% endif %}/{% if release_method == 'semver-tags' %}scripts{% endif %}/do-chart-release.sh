@@ -40,7 +40,9 @@ fullrun() {
   # This just adds the webapp directory to the flags
   COMMAND_STRING+="--directories ${PACKAGE_DIR} "
 
-  RESULT=$($COMMAND_STRING)
+  # We do a dry run first because we don't want tags to happen before we've updated the chart.yaml
+  COMMAND_DRY="${COMMAND_STRING} --dry_run "
+  RESULT=$($COMMAND_DRY)
 
   # Parse the results out to get the versions we need to update and the release notes
   PUBLISHED=$(yq -P ".New_release_published" <<< $RESULT)
@@ -86,11 +88,8 @@ fullrun() {
   if [[ "${DRYRUN}" == "true" ]]; then
     echo "Would git push here"
   else
-    # We only want to push if we have released something. This also makes the whole operation idempotent
-    # so it can be rerun and the git state will be updated without breaking future runs
-    if [[ "${RELEASED_CHANGES}" == "true" ]]; then
-      git push
-    fi
+    RESULT=$($COMMAND_STRING)
+    git push
   fi
 
   echo "RELEASED_CHANGES=${RELEASED_CHANGES}"
