@@ -35,15 +35,9 @@ spec:
             - name: PORT
               value: {{ .Values.service.port | quote }}
             - name: HTTP_PORT
-              value: {{ .Values.http.port | quote }}
+              value: {{ .Values.gateway.port | quote }}
             - name: SERVE_HTTP
-              value: {{ .Values.http.enabled | quote }}
-            - name: SCHEDULE_WINDOW
-              value: {{ .Values.app.scheduleWindow }}
-            - name: RUNNER_WINDOW
-              value: {{ .Values.app.runnerWindow }}
-            - name: CLEANUP_WINDOW
-              value: {{ .Values.app.cleanupWindow }}
+              value: {{ .Values.gateway.enabled | quote }}
             - name: SENTRY_ENABLED
               value: {{ .Values.sentry.enabled | quote }}
             - name: SENTRY_CLIENT_OPTIONS
@@ -89,22 +83,20 @@ spec:
             {% endif %}
 {% raw %}
           ports:
-            - name: http
+            - name: grpc
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-            - name: health
-              containerPort: {{ .Values.healthCheck.port }}
+            - name: gateway
+              containerPort: {{ .Values.gateway.port }}
               protocol: TCP
           livenessProbe:
-            exec:
-              command:
-                - "/grpc_health_probe"
-                - "-addr=:{{ .Values.service.port }}"
+            httpGet:
+              path: /healthy
+              port: gateway
           readinessProbe:
-            exec:
-              command:
-                - "/grpc_health_probe"
-                - "-addr=:{{ .Values.service.port }}"
+            httpGet:
+              path: /ready
+              port: gateway
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

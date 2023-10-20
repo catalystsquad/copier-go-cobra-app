@@ -1,0 +1,52 @@
+package test
+
+import (
+	{{ short_project_name }}v1 "{{ full_project_name }}/protos/gen/go/{{ short_project_name }}/v1"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/testing/protocmp"
+)
+
+func (s *{{ short_project_name[0]|upper}}{{short_project_name[1:] }}Suite) TestListActions() {
+	Actions, err := ListActions(1000, 0, "")
+	require.NoError(s.T(), err)
+	Actions = lo.Filter(Actions, func(item *{{ short_project_name }}v1.Action, index int) bool {
+		return LoadedTestData.ActionIds.Contains(lo.FromPtr(item.Id))
+	})
+	assertProtoEqualitySortById(s.T(), LoadedTestData.Actions, Actions)
+}
+
+func (s *{{ short_project_name[0]|upper}}{{short_project_name[1:] }}Suite) TestGetActionsById() {
+	ids := []string{}
+	for _, id := range LoadedTestData.ActionIds.Values() {
+		ids = append(ids, id.(string))
+	}
+	Actions, err := GetActionsById(ids)
+	require.NoError(s.T(), err)
+	assertProtoEqualitySortById(s.T(), LoadedTestData.Actions, Actions)
+}
+
+func (s *{{ short_project_name[0]|upper}}{{short_project_name[1:] }}Suite) TestUpdateActions() {
+	actions := CreateRandomNumActions(s.T())
+	randomizedActions := randomizeActions(s.T(), actions)
+	updatedActions, err := UpsertActions(randomizedActions)
+	require.NoError(s.T(), err)
+
+	assertProtoEqualitySortById(s.T(), randomizedActions, updatedActions,
+		protocmp.IgnoreFields(&{{ short_project_name }}v1.Action{}, "id", "updatedAt"),
+		// ignoring all action fields beside the id and created_at because action upsert shouldn't modify actions, except for associations, and the randomize method randomizes action data, but not ids, so the action associations should not change
+		protocmp.IgnoreFields(&{{ short_project_name }}v1.Action{}, "updatedAt", "outputName", "medium", "prompt"),
+	)
+}
+
+func (s *{{ short_project_name[0]|upper}}{{short_project_name[1:] }}Suite) TestDeleteActions() {
+	Actions := CreateRandomNumActions(s.T())
+	ids := lo.Map(Actions, func(item *{{ short_project_name }}v1.Action, index int) string {
+		return lo.FromPtr(item.Id)
+	})
+	err := DeleteActions(ids)
+	require.NoError(s.T(), err)
+	Actions, err = GetActionsById(ids)
+	require.NoError(s.T(), err)
+	require.Len(s.T(), Actions, 0)
+}

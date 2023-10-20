@@ -1,0 +1,23 @@
+postgresql:
+  primary:
+    persistence:
+      enabled: false
+    initdb:
+      scripts:
+        init.sql: |
+          create database corndogs;
+# corndogs:
+#   enabled: true
+#   appconfig:
+#     prometheusEnabled: false
+#   image:
+#     repository: quay.io/tnlcommunity/corndogs
+#   postgresql:
+#     enabled: false
+#   database:
+#     dbname: corndogs
+#     host: api-postgresql
+#     user: postgres
+#     password: postgres
+auth:
+  enabled: false

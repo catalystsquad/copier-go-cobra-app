@@ -64,3 +64,67 @@ serviceMonitor:
   interval: null
   scrapeTimeout: null
   relabelings: []
+
+appstore:
+{% if db_choice == 'Postgres' %}
+  cockroachdb:
+    enabled: false
+  postgres:
+    enabled: true
+    secrets:
+      POSTGRESDB_URI: postgresql://devdbuser:devdbpass@localhost:5432
+{% elif db_choice == 'Cockroach' %}
+  cockroachdb:
+    enabled: true
+    secrets: 
+      COCKROACHDB_URI: postgresql://devdbuser:devdbpass@localhost:5432
+  postgres:
+    enabled: false
+{% elif db_choice == 'None' %}
+  cockroachdb:
+    enabled: false
+  postgres:
+    enabled: false
+{% endif %}
+
+sentry:
+  enabled: false
+prometheus:
+  enabled: false
+
+app: {}
+
+prometheus:
+  enabled: false
+  path: /metrics
+  port: 9090
+  latencyHistogramsEnabled: true
+
+gateway:
+  enabled: true
+  port: 6001
+  restartDelay: 5s
+  httpProxy:
+    enabled: false
+    # fqdn: sub.example.com
+    tlsSecretName: cert-manager/wildcard-certificate
+    prefix: /v1
+    port: 6001
+    corsPolicy:
+      allowHeaders:
+      - authorization
+      - content-type
+      allowMethods:
+      - '*'
+      allowOrigin:
+      - '*'
+    externalAuth:
+      enabled: false
+      # extensionRef:
+      #   name: external-auth
+      #   namespace: external-auth
+      # withRequestBody:
+      #   maxRequestBytes: 100000
+      #   allowPartialMessage: true
+      #   packAsBytes: true
+      # responseTimeout: 1s
