@@ -3,7 +3,7 @@ _subdirectory: template
 full_project_name:
   type: str
   help: "Full project name (go module path) ex: github.com/catalystsquad/example-app"
-  default: "github.com/catalystsquad/sprinkles"
+  default: "github.com/catalystcommunity/sprinkles"
 
 short_project_name:
   type: str
