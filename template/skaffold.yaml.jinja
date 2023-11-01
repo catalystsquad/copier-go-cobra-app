@@ -45,12 +45,21 @@ portForward:
     namespace: api
     port: 6001
     localPort: 6001
+{% if db_choice == 'Postgres' %}
   # pf for postgres
   - resourceType: service
     resourceName: api-postgresql
     namespace: api
     port: 5432
     localPort: 5432
+{% elif db_choice == 'Cockroach' %}
+  # pf for cockroach
+  - resourceType: service
+    resourceName: api-cockroach
+    namespace: api
+    port: 26257
+    localPort: 26257
+{% endif %}
 profiles:
   - name: actions
     activation:
@@ -64,3 +73,8 @@ profiles:
             dependencies:
               dockerfile:
                 path: Dockerfile
+  - name: test
+    patches:
+      - op: replace
+        path: /deploy/helm/releases/0/namespace
+        value: test

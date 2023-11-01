@@ -72,12 +72,12 @@ appstore:
   postgres:
     enabled: true
     secrets:
-      POSTGRESDB_URI: postgresql://devdbuser:devdbpass@localhost:5432
+      POSTGRESDB_URI: postgresql://devdbuser:devdbpass@api-postgres:5432
 {% elif db_choice == 'Cockroach' %}
   cockroachdb:
     enabled: true
     secrets: 
-      COCKROACHDB_URI: postgresql://devdbuser:devdbpass@localhost:5432
+      COCKROACHDB_URI: postgresql://devdbuser:devdbpass@api-cockroach:5432
   postgres:
     enabled: false
 {% elif db_choice == 'None' %}
