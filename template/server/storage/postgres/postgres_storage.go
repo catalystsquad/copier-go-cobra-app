@@ -2,23 +2,18 @@ package postgres
 
 import (
 	"database/sql"
-	"embed"
+	"log"
+	"os"
+
 	"github.com/catalystsquad/app-utils-go/env"
-	"github.com/catalystsquad/app-utils-go/errorutils"
 	"github.com/catalystsquad/app-utils-go/logging"
 	_ "github.com/lib/pq"
-	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"os"
-	"time"
 )
 
 type PostgresStorage struct{}
-
-const migrationsDirectory = "migrations"
 
 var uri = env.GetEnvOrDefault("POSTGRES_URI", "postgresql://postgres:postgres@localhost:5432?sslmode=disable")
 var gormLogLevel = env.GetEnvOrDefault("POSTGRES_LOG_LEVEL", "error")
@@ -30,9 +25,6 @@ var maxOpenConns = env.GetEnvAsIntOrDefault("POSTGRES_MAX_OPEN_CONNS", "100")
 var connMaxLifetime = env.GetEnvAsDurationOrDefault("POSTGRES_CONN_MAX_LIFETIME", "1h")
 var connMaxIdleTime = env.GetEnvAsDurationOrDefault("POSTGRES_CONN_MAX_IDLE_TIME", "10m")
 var db *gorm.DB
-
-//go:embed migrations/*.sql
-var migrations embed.FS
 
 func (p PostgresStorage) Initialize() (shutdown func(), err error) {
 	config := &gorm.Config{
@@ -63,7 +55,6 @@ func (p PostgresStorage) Initialize() (shutdown func(), err error) {
 	//if err != nil {
 	//	panic(err)
 	//}
-	runMigrations(migrationsDirectory)
 	return nil, nil
 }
 
@@ -88,25 +79,4 @@ func (p PostgresStorage) Ready() bool {
 		return false
 	}
 	return sqlDb.Ping() == nil
-}
-
-func runMigrations(directory string) {
-	var err error
-	var db *sql.DB
-	var success bool
-	goose.SetBaseFS(migrations)
-	for !success {
-		if db, err = sql.Open("postgres", uri); err != nil {
-			errorutils.LogOnErr(nil, "error opening connection to database during sql migrations", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		defer db.Close()
-		if err = goose.Up(db, directory); err != nil {
-			errorutils.LogOnErr(nil, "error running migrations", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		success = true
-	}
 }

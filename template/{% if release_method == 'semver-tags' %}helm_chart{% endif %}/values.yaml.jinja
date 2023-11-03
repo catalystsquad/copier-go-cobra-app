@@ -27,8 +27,8 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  fsGroup: 2000
 
 securityContext:
   # capabilities:
@@ -38,7 +38,6 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 2000
   runAsGroup: 2000
-  fsGroup: 2000
 
 service:
   type: ClusterIP
@@ -66,26 +65,46 @@ serviceMonitor:
   relabelings: []
 
 appstore:
-{% if db_choice == 'Postgres' %}
+{% if db_choice == 'Cockroach' %}
+  cockroachdb:
+    enabled: true
+    secrets: 
+      COCKROACH_URI: postgresql://postgres:postgres@api-cockroach:5432?sslmode=disable
+  postgres:
+    enabled: false
+{% elif db_choice == 'Postgres' %}
   cockroachdb:
     enabled: false
   postgres:
     enabled: true
     secrets:
-      POSTGRESDB_URI: postgresql://devdbuser:devdbpass@api-postgres:5432
-{% elif db_choice == 'Cockroach' %}
-  cockroachdb:
-    enabled: true
-    secrets: 
-      COCKROACHDB_URI: postgresql://devdbuser:devdbpass@api-cockroach:5432
-  postgres:
+      POSTGRES_URI: postgresql://postgres:postgres@api-postgresql:5432?sslmode=disable
+
+postgresql:
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+  tls:
     enabled: false
+  # disable persistence by default
+  primary:
+    persistence:
+      enabled: false
 {% elif db_choice == 'None' %}
   cockroachdb:
     enabled: false
   postgres:
     enabled: false
 {% endif %}
+
+migrations:
+  #ttlSecondsAfterFinished: 0 # defines how long the job stays in k8s after completion, default to 1 day. Recommendation is to keep this relatively short so we don't have a long permanent record of migration pods. Not present by default because argocd cleans up the job for us when a new version is deployed
+  restartPolicy: OnFailure
+  backoffLimit: 100
+  resources:
+    requests:
+      cpu: 100m
+      memory: 250Mi
 
 sentry:
   enabled: false

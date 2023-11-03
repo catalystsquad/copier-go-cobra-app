@@ -8,5 +8,5 @@ create table hellos
     created_at               timestamp default now(),
     updated_at               timestamp default now(),
     hello_type               bigint,
-    person_name              text,
+    person_name              text
 );

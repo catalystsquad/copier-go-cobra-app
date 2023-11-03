@@ -12,11 +12,11 @@ const CorndogsQueueType = "corndogs"
 
 var GrpcMaxMsgSizeBytes = env.GetEnvAsIntOrDefault("GRPC_MAX_MSG_SIZE_BYTES", "52428800") // 50MB
 var port = env.GetEnvAsIntOrDefault("PORT", "6000")
+var GatewayPort = env.GetEnvAsIntOrDefault("GATEWAY_PORT", "6001")
 var prometheusEnabled = env.GetEnvAsBoolOrDefault("PROMETHEUS_ENABLED", "false")
 var promethusPath = env.GetEnvOrDefault("PROMETHEUS_PATH", "/metrics")
 var prometheusPort = env.GetEnvAsIntOrDefault("PROMETHEUS_PORT", "9090")
 var enablePrometheusLatencyHistograsm = env.GetEnvAsBoolOrDefault("PROMETHEUS_LATENCY_HISTOGRAMS_ENABLED", "true")
-var GatewayPort = env.GetEnvAsIntOrDefault("GATEWAY_PORT", "8081")
 var GatewayRestartDelay = env.GetEnvAsDurationOrDefault("GATEWAY_RESTART_DELAY", "5s")
 var StorageType = env.GetEnvOrDefault("STORAGE_TYPE", storage.PostgresStorageType)
 var CorndogsUri = env.GetEnvOrDefault("CORNDOGS_URI", "localhost:5080")

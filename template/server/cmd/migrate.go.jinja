@@ -1,11 +1,20 @@
 package cmd
 
 import (
-	"fmt"
+	"embed"
 
-	_ "github.com/lib/pq"
+	"github.com/catalystsquad/app-utils-go/env"
+	"github.com/catalystsquad/app-utils-go/errorutils"
+	"github.com/catalystsquad/app-utils-go/logging"
+	"github.com/pressly/goose/v3"
 	"github.com/spf13/cobra"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
+
+//go:embed migrations/*.sql
+var migrations embed.FS
+var uri = env.GetEnvOrDefault("POSTGRES_URI", "postgresql://root:root@service-api-go-cockroachdb:26257?sslmode=disable")
 
 // migrateCmd represents the migrate command
 var migrateCmd = &cobra.Command{
@@ -31,16 +40,14 @@ func init() {
 	// migrateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func migrate() {
-	//// Open a "connection" to sqlite.
-	//db, err := sql.Open("postgres", viper.GetString("POSTGRES_URI"))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//// Open an atlas driver.
-	//driver, err := postgres.Open(db)
-	//if err != nil {
-	//	panic(err)
-	//}
-	////driver.ApplyChanges(context.Background(), []schema.Change{% raw %}${{}}{% endraw %})
+func runMigrations() {
+	db, err := gorm.Open(postgres.Open(uri), &gorm.Config{})
+	errorutils.PanicOnErr(nil, "error opening database connection", err)
+	sqldb, err := db.DB()
+	errorutils.PanicOnErr(nil, "error getting database connection", err)
+	// set goose file system to use the embedded migrations
+	goose.SetBaseFS(migrations)
+	logging.Log.Info("Running migrations")
+	err = goose.Up(sqldb, "migrations")
+	errorutils.PanicOnErr(nil, "error running migrations", err)
 }
