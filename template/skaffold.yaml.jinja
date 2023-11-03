@@ -35,13 +35,13 @@ deploy:
 portForward:
   # pf for grpc server
   - resourceType: service
-    resourceName: api
+    resourceName: api-{{ short_project_name }}
     namespace: api
     port: 6000
     localPort: 6000
   # pf for grpc gateway
   - resourceType: service
-    resourceName: api
+    resourceName: api-{{ short_project_name }}
     namespace: api
     port: 6001
     localPort: 6001

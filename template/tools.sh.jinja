@@ -34,6 +34,12 @@ run() {
   cd server; go mod tidy; go run main.go; cd -
 }
 
+setup() {
+  build_protos
+  cd helm_chart; helm dependency build ./; cd -
+  cd server; go mod tidy; cd -
+}
+
 # This should be last in the script, all other functions are named beforehand.
 case "$1" in
   "install_proto_tools")
@@ -44,13 +50,13 @@ case "$1" in
     shift
     build_protos "$@"
     ;;
-  "setup")
-    shift
-    build_protos "$@"
-    ;;
   "run")
     shift
     run "$@"
+    ;;
+  "setup")
+    shift
+    setup "$@"
     ;;
   *)
     usage

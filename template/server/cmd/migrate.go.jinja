@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"embed"
+	"fmt"
 
 	"github.com/catalystsquad/app-utils-go/env"
 	"github.com/catalystsquad/app-utils-go/errorutils"
@@ -14,7 +15,7 @@ import (
 
 //go:embed migrations/*.sql
 var migrations embed.FS
-var uri = env.GetEnvOrDefault("POSTGRES_URI", "postgresql://root:root@service-api-go-cockroachdb:26257?sslmode=disable")
+var uri = env.GetEnvOrDefault("POSTGRES_URI", "postgresql://postgres:postgres@localhost:5432?sslmode=disable")
 
 // migrateCmd represents the migrate command
 var migrateCmd = &cobra.Command{
