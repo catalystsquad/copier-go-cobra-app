@@ -23,7 +23,7 @@ var migrateCmd = &cobra.Command{
 	Short: "Performs {{ short_project_name }} database migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("migrate called")
+		runMigrations()
 	},
 }
 
@@ -42,6 +42,7 @@ func init() {
 }
 
 func runMigrations() {
+	fmt.Println("migrate called")
 	db, err := gorm.Open(postgres.Open(uri), &gorm.Config{})
 	errorutils.PanicOnErr(nil, "error opening database connection", err)
 	sqldb, err := db.DB()
