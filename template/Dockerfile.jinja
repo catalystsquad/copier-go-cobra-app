@@ -33,4 +33,4 @@ COPY --from=builder /bin/grpc_health_probe ./grpc_health_probe
 {%- endif %}
 USER 65532:65532
 
-ENTRYPOINT ["/main", "serve"]
+ENTRYPOINT ["/main"]
